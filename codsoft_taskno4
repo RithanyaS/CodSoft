@@ -1,0 +1,121 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
+
+class QuizQuestion {
+	private String question;
+    private List<String> options;
+    private int correctOptionIndex;
+
+    public QuizQuestion(String question, List<String> options, int correctOptionIndex) {
+        this.question = question;
+        this.options = options;
+        this.correctOptionIndex = correctOptionIndex;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public List<String> getOptions() {
+        return options;
+    }
+
+    public int getCorrectOptionIndex() {
+        return correctOptionIndex;
+    }
+}
+
+public class QuizApplication {
+    private List<QuizQuestion> quizQuestions;
+    private int currentQuestionIndex;
+    private int userScore;
+
+    public QuizApplication(List<QuizQuestion> quizQuestions) {
+        this.quizQuestions = quizQuestions;
+        this.currentQuestionIndex = 0;
+        this.userScore = 0;
+    }
+
+    public void startQuiz() {
+        System.out.println("Welcome to the Quiz!");
+
+        for (QuizQuestion question : quizQuestions) {
+            displayQuestion(question);
+            waitForAnswer(question);
+        }
+
+        displayResult();
+    }
+
+    private void displayQuestion(QuizQuestion question) {
+        System.out.println("\nQuestion: " + question.getQuestion());
+        List<String> options = question.getOptions();
+        for (int i = 0; i < options.size(); i++) {
+            System.out.println((i + 1) + ". " + options.get(i));
+        }
+
+        startTimer(question);
+    }
+
+    private void startTimer(QuizQuestion question) {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("\nTime's up! Moving to the next question.");
+                evaluateAnswer(question, -1);
+                timer.cancel(); // Cancel the timer after evaluation
+            }
+        }, 15000); // 15 seconds timer (adjust as needed)
+    }
+
+    private void waitForAnswer(QuizQuestion question) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("\nEnter your answer (1-" + question.getOptions().size() + "): ");
+        int userAnswer = scanner.nextInt();
+        evaluateAnswer(question, userAnswer - 1); // Adjust user answer to match the index
+    }
+
+    private void evaluateAnswer(QuizQuestion question, int userAnswer) {
+        // You may want to add some logic here to prevent evaluating multiple times
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                if (userAnswer == question.getCorrectOptionIndex()) {
+                    System.out.println("Correct!");
+                    userScore++;
+                } else {
+                    System.out.println("Incorrect. The correct answer was option " + (question.getCorrectOptionIndex() + 1));
+                }
+            }
+        };
+
+        // Schedule the task to run after a short delay (adjust as needed)
+        new Timer().schedule(task, 100);
+    }
+
+    private void displayResult() {
+        System.out.println("\nQuiz Completed!");
+        System.out.println("Your Final Score: " + userScore + " out of " + quizQuestions.size());
+
+        System.out.println("Summary of Correct/Incorrect Answers:");
+        for (int i = 0; i < quizQuestions.size(); i++) {
+            QuizQuestion question = quizQuestions.get(i);
+            System.out.println("Question " + (i + 1) + ": " + (userScore > i ? "Correct" : "Incorrect"));
+        }
+    }
+
+    public static void main(String[] args) {
+        // Example usage with three questions
+        List<QuizQuestion> questions = new ArrayList<>();
+        questions.add(new QuizQuestion("What is the capital of India?", List.of("Delhi", "Berlin", "London"), 0));
+        questions.add(new QuizQuestion("Which planet is known as the Red Planet?", List.of("Mars", "Venus", "Jupiter"), 0));
+        questions.add(new QuizQuestion("Who wrote 'Ramayana'?", List.of("Valmiki", "Vyasa", "Kambar"), 0));
+
+        QuizApplication quizApp = new QuizApplication(questions);
+        quizApp.startQuiz();
+    }
+}
