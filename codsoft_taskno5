@@ -1,0 +1,199 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Course {
+    private String courseCode;
+    private String title;
+    private String description;
+    private int capacity;
+    private String schedule;
+    private List<Student> enrolledStudents;
+
+    public Course(String courseCode, String title, String description, int capacity, String schedule) {
+        this.courseCode = courseCode;
+        this.title = title;
+        this.description = description;
+        this.capacity = capacity;
+        this.schedule = schedule;
+        this.enrolledStudents = new ArrayList<>();
+    }
+
+    public String getCourseCode() {
+        return courseCode;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public String getSchedule() {
+        return schedule;
+    }
+
+    public List<Student> getEnrolledStudents() {
+        return enrolledStudents;
+    }
+
+    public boolean registerStudent(Student student) {
+        if (enrolledStudents.size() < capacity) {
+            enrolledStudents.add(student);
+            return true; // Registration successful
+        } else {
+            return false; // Course is full
+        }
+    }
+
+    public boolean removeStudent(Student student) {
+        return enrolledStudents.remove(student);
+    }
+
+    @Override
+    public String toString() {
+        return "Course Code: " + courseCode + "\nTitle: " + title + "\nDescription: " + description
+                + "\nCapacity: " + capacity + "\nSchedule: " + schedule;
+    }
+}
+
+class Student {
+    private String studentID;
+    private String name;
+    private List<Course> registeredCourses;
+
+    public Student(String studentID, String name) {
+        this.studentID = studentID;
+        this.name = name;
+        this.registeredCourses = new ArrayList<>();
+    }
+
+    public String getStudentID() {
+        return studentID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Course> getRegisteredCourses() {
+        return registeredCourses;
+    }
+
+    public boolean registerForCourse(Course course) {
+        if (!registeredCourses.contains(course)) {
+            if (course.registerStudent(this)) {
+                registeredCourses.add(course);
+                return true; // Registration successful
+            } else {
+                return false; // Course is full
+            }
+        } else {
+            return false; // Already registered for the course
+        }
+    }
+
+    public boolean dropCourse(Course course) {
+        if (registeredCourses.contains(course)) {
+            if (course.removeStudent(this)) {
+                registeredCourses.remove(course);
+                return true; // Course dropped successfully
+            } else {
+                return false; // Error removing student from course
+            }
+        } else {
+            return false; // Student is not registered for the course
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Student ID: " + studentID + "\nName: " + name;
+    }
+}
+
+public class CourseRegistrationSystem {
+    private List<Course> courses;
+    private List<Student> students;
+
+    public CourseRegistrationSystem() {
+        this.courses = new ArrayList<>();
+        this.students = new ArrayList<>();
+    }
+
+    public void addCourse(Course course) {
+        courses.add(course);
+    }
+
+    public void addStudent(Student student) {
+        students.add(student);
+    }
+
+    public void displayCourses() {
+        System.out.println("\nAvailable Courses:");
+        for (Course course : courses) {
+            System.out.println(course);
+            System.out.println("Enrolled Students: " + course.getEnrolledStudents().size() + "/" + course.getCapacity());
+            System.out.println("--------------------");
+        }
+    }
+
+    public void displayStudents() {
+        System.out.println("\nRegistered Students:");
+        for (Student student : students) {
+            System.out.println(student);
+            System.out.println("Registered Courses:");
+            for (Course course : student.getRegisteredCourses()) {
+                System.out.println("- " + course.getTitle());
+            }
+            System.out.println("--------------------");
+        }
+    }
+
+    public static void main(String[] args) {
+        CourseRegistrationSystem registrationSystem = new CourseRegistrationSystem();
+
+        Course course1 = new Course("CS101", "Introduction to Programming", "Basic programming concepts", 30, "Mon, Wed, Fri 10:00 AM");
+        Course course2 = new Course("MATH201", "Calculus I", "Limits, derivatives, integrals", 25, "Tue, Thu 2:00 PM");
+        Course course3 = new Course("ENG101", "English Composition", "Writing and communication skills", 20, "Mon, Wed 1:00 PM");
+
+        Student student1 = new Student("S001", "John Doe");
+        Student student2 = new Student("S002", "Jane Smith");
+        Student student3 = new Student("S003", "Bob Johnson");
+
+        registrationSystem.addCourse(course1);
+        registrationSystem.addCourse(course2);
+        registrationSystem.addCourse(course3);
+
+        registrationSystem.addStudent(student1);
+        registrationSystem.addStudent(student2);
+        registrationSystem.addStudent(student3);
+
+        registrationSystem.displayCourses();
+        registrationSystem.displayStudents();
+
+        // Example: Student registration for courses
+        student1.registerForCourse(course1);
+        student1.registerForCourse(course2);
+        student2.registerForCourse(course1);
+        student3.registerForCourse(course2);
+        student3.registerForCourse(course3);
+
+        System.out.println("\nAfter Registration:");
+        registrationSystem.displayCourses();
+        registrationSystem.displayStudents();
+
+        // Example: Student dropping a course
+        student1.dropCourse(course2);
+
+        System.out.println("\nAfter Dropping a Course:");
+        registrationSystem.displayCourses();
+        registrationSystem.displayStudents();
+    }
+}
